@@ -346,6 +346,226 @@
     .logout-btn i {
         font-size: 1.1rem;
     }
+
+    .filter-section {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 20px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--gray-700);
+        font-weight: 500;
+    }
+
+    .form-select, .form-control {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid var(--gray-300);
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .filter-group span {
+        display: inline-block;
+        margin: 0 8px;
+        color: var(--gray-600);
+    }
+
+    .filter-group select[multiple] {
+        height: auto;
+        min-height: 100px;
+    }
+
+    .filter-group small {
+        display: block;
+        margin-top: 4px;
+        font-size: 12px;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+    }
+
+    @media (max-width: 768px) {
+        .filter-group select[multiple] {
+            min-height: 80px;
+        }
+        
+        .filter-actions {
+            width: 100%;
+            margin-top: 15px;
+        }
+    }
+
+    select {
+  appearance: none; /* Убирает стандартный стиль браузера */
+  -webkit-appearance: none; /* Для Safari */
+  -moz-appearance: none; /* Для Firefox */
+  background-color: #f0f0f0; /* Цвет фона */
+  border: 1px solid #ccc; /* Граница */
+  border-radius: 4px; /* Закругление углов */
+  padding: 10px;
+  font-size: 16px;
+  color: #333;
+  cursor: pointer;
+  width: 200px;
+}
+
+/* Добавление стрелки (для кастомного вида) */
+select {
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"%3E%3Cpath fill="%23999" d="M2 0L0 2h4z" /%3E%3C/svg%3E'); /* Стрелка */
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+}
+
+/* Ховер эффект */
+select:hover {
+  border-color: #888;
+}
+
+/* Фокус */
+select:focus {
+  outline: none;
+  border-color: #007BFF;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.announcement-form {
+    background: white;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 32px;
+}
+
+.announcement-form .form-title {
+    color: var(--primary-color);
+    margin-bottom: 24px;
+}
+
+.announcement-form .form-control[type="file"] {
+    padding: 8px;
+}
+
+/* Стили для карточек объявлений */
+.announcement-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.announcement-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.announcement-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.announcement-content {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+    margin-bottom: 16px;
+}
+
+.announcement-image {
+    width: 200px;
+    height: 150px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.announcement-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.announcement-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid var(--gray-200);
+}
+
+/* Стили для модального окна редактирования */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 32px;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 600px;
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--gray-600);
+}
+
+/* Стили для тегов */
+.tag {
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.tag-important { background: #FEE2E2; color: #DC2626; }
+.tag-news { background: #E0E7FF; color: #4F46E5; }
+.tag-update { background: #ECFDF5; color: #059669; }
+.tag-event { background: #FEF3C7; color: #D97706; }
     </style>
 </head>
 <body>
@@ -362,6 +582,11 @@
                     <i class="fas fa-sign-out-alt"></i>
                     Выйти
                 </a>
+                <div class="nav-title">Управление контентом</div>
+                <a href="#announcements" class="nav-link">
+                    <i class="fas fa-bullhorn"></i>
+                    Объявления
+                </a>
             </div>
         </div>
 
@@ -371,6 +596,87 @@
                 <h1 class="page-title">Управление уведомлениями</h1>
                 <p class="page-description">Создавайте и управляйте уведомлениями для компаний</p>
             </div>
+
+            <!-- Добавить новую секцию в основной контент -->
+<div id="announcements-section" class="content-section">
+    <div class="page-header">
+        <h1 class="page-title">Управление объявлениями</h1>
+    </div>
+
+    <!-- Фильтры -->
+    <div class="filters-card">
+        <form method="GET" class="filters-form">
+            <div class="form-group">
+                <label>Период:</label>
+                <div class="date-range">
+                    <input type="date" name="date_from" class="form-control" 
+                           value="{{ selected_filters.date_from|date:'Y-m-d' }}">
+                    <span>—</span>
+                    <input type="date" name="date_to" class="form-control"
+                           value="{{ selected_filters.date_to|date:'Y-m-d' }}">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Теги:</label>
+                <div class="tags-filter">
+                    {% for tag_value, tag_label in tags %}
+                    <label class="tag-checkbox">
+                        <input type="checkbox" name="tags" value="{{ tag_value }}"
+                               {% if tag_value in selected_filters.tags %}checked{% endif %}>
+                        {{ tag_label }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="filters-actions">
+                <button type="submit" class="btn btn-primary">Применить</button>
+                <a href="{% url 'announcements_management' %}" class="btn btn-secondary">Сбросить</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Список объявлений -->
+    <div class="announcements-list">
+        {% for announcement in announcements %}
+        <div class="announcement-card">
+            <div class="announcement-header">
+                <h3>{{ announcement.title }}</h3>
+                <div class="announcement-actions">
+                    <button class="btn btn-sm btn-primary edit-announcement" 
+                            data-id="{{ announcement.id }}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger delete-announcement" 
+                            data-id="{{ announcement.id }}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="announcement-content">
+                {% if announcement.image %}
+                <div class="announcement-image">
+                    <img src="{{ announcement.image.url }}" alt="{{ announcement.title }}">
+                </div>
+                {% endif %}
+                <p>{{ announcement.description }}</p>
+            </div>
+            
+            <div class="announcement-footer">
+                <span class="tag tag-{{ announcement.tags }}">
+                    {{ announcement.get_tags_display }}
+                </span>
+                <span class="date">
+                    <i class="far fa-calendar"></i>
+                    {{ announcement.created_at|date:"d.m.Y" }}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 
             <!-- Форма создания уведомления -->
             <form id="notificationForm" class="notification-form">
@@ -413,6 +719,31 @@
                 </button>
             </form>
 
+            <div class="announcement-form">
+                <h2 class="form-title">
+                    <i class="fas fa-bullhorn"></i>
+                    Создать объявление
+                </h2>
+                <form id="announcementForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Заголовок</label>
+                        <input type="text" name="title" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Описание</label>
+                        <textarea name="description" class="form-control" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Изображение</label>
+                        <input type="file" name="image" class="form-control" accept="image/*">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Создать объявление
+                    </button>
+                </form>
+            </div>
+
             <!-- Список уведомлений -->
             <div class="notifications-container">
                 <div class="notifications-header">
@@ -420,6 +751,49 @@
                         <i class="fas fa-history"></i>
                         История уведомлений
                     </div>
+                </div>
+
+                <div class="filter-section">
+                    <form method="GET" class="filter-form">
+                        <div class="filter-group">
+                            <label>Компании:</label>
+                            <select name="companies" class="form-select" multiple size="3">
+                                {% for company in companies %}
+                                <option value="{{ company.id }}" 
+                                        {% if company.id in selected_filters.selected_companies %}selected{% endif %}>
+                                    {{ company.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Зажмите Ctrl для выбора нескольких</small>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>Статус ответа:</label>
+                            <select name="reply_type" class="form-select">
+                                <option value="">Все</option>
+                                {% for value, label in reply_types %}
+                                <option value="{{ value }}" {% if selected_filters.reply_type == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>Период:</label>
+                            <input type="date" name="date_from" class="form-control" 
+                                   value="{% if selected_filters.date_from %}{{ selected_filters.date_from|date:'Y-m-d' }}{% endif %}">
+                            <span>—</span>
+                            <input type="date" name="date_to" class="form-control"
+                                   value="{% if selected_filters.date_to %}{{ selected_filters.date_to|date:'Y-m-d' }}{% endif %}">
+                        </div>
+                        
+                        <div class="filter-actions">
+                            <button type="submit" class="btn btn-primary">Применить фильтры</button>
+                            <a href="{% url 'notifications_management' %}" class="btn btn-secondary">Сбросить</a>
+                        </div>
+                    </form>
                 </div>
 
                 <div class="notifications-list">
@@ -555,6 +929,112 @@
                     alert('Ошибка: ' + data.message);
                 }
             });
+        });
+
+        document.getElementById('announcementForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch('{% url "create_announcement" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    alert('Ошибка: ' + data.message);
+                }
+            });
+        });
+
+        // Функция для открытия модального окна редактирования
+        function openEditModal(announcement) {
+            const modal = document.getElementById('editAnnouncementModal');
+            const form = modal.querySelector('form');
+            
+            // Заполняем форму данными объявления
+            form.querySelector('[name="title"]').value = announcement.title;
+            form.querySelector('[name="description"]').value = announcement.description;
+            form.querySelector('[name="tags"]').value = announcement.tags;
+            form.querySelector('[name="is_active"]').checked = announcement.is_active;
+            
+            // Показываем текущее изображение
+            const currentImage = modal.querySelector('.current-image');
+            if (announcement.image) {
+                currentImage.innerHTML = `<img src="${announcement.image}" alt="Current image">`;
+            } else {
+                currentImage.innerHTML = '<p>Нет изображения</p>';
+            }
+            
+            form.dataset.announcementId = announcement.id;
+            modal.classList.add('active');
+        }
+
+        // Обработчик формы редактирования
+        document.getElementById('editAnnouncementForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const announcementId = this.dataset.announcementId;
+            
+            fetch(`/announcements/${announcementId}/edit/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    alert('Ошибка: ' + data.message);
+                }
+            });
+        });
+
+        // Обработчики кнопок редактирования и удаления
+        document.querySelectorAll('.edit-announcement').forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.dataset.id;
+                fetch(`/announcements/${id}/`)
+                    .then(response => response.json())
+                    .then(data => openEditModal(data));
+            });
+        });
+
+        document.querySelectorAll('.delete-announcement').forEach(button => {
+            button.addEventListener('click', function() {
+                if (confirm('Вы уверены, что хотите удалить это объявление?')) {
+                    const id = this.dataset.id;
+                    fetch(`/announcements/${id}/delete/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            location.reload();
+                        } else {
+                            alert('Ошибка: ' + data.message);
+                        }
+                    });
+                }
+            });
+        });
+
+        // Закрытие модального окна
+        document.querySelector('.modal-close').addEventListener('click', function() {
+            document.getElementById('editAnnouncementModal').classList.remove('active');
         });
     </script>
 </body>

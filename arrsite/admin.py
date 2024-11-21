@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CompanyData, Notification
+from .models import CompanyData, Notification, Announcement
 
 @admin.register(CompanyData)
 class CompanyDataAdmin(admin.ModelAdmin):
@@ -34,3 +34,19 @@ class NotificationAdmin(admin.ModelAdmin):
     list_filter = ('type', 'is_read', 'created_at')
     search_fields = ('company__name', 'company__bin_iin', 'message')
     readonly_fields = ('created_at',)
+
+@admin.register(Announcement)
+class AnnouncementAdmin(admin.ModelAdmin):
+    list_display = ('title', 'created_at', 'created_by', 'is_active')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('title', 'description')
+    readonly_fields = ('created_at',)
+    
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('title', 'description', 'image')
+        }),
+        ('Статус', {
+            'fields': ('is_active', 'created_by', 'created_at')
+        }),
+    )

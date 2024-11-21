@@ -11,4 +11,9 @@ urlpatterns = [
     path('notifications/create/', views.create_notification, name='create_notification'),
     path('notifications/reply/', views.create_notification_reply, name='create_notification_reply'),
     path('logout/', views.logout_view, name='logout'),
+    path('announcements/management/', views.announcements_management, name='announcements_management'),
+    path('announcements/create/', views.create_announcement, name='create_announcement'),
+    path('announcements/<int:announcement_id>/', views.get_announcement, name='get_announcement'),
+    path('announcements/<int:announcement_id>/edit/', views.edit_announcement, name='edit_announcement'),
+    path('announcements/<int:announcement_id>/delete/', views.delete_announcement, name='delete_announcement'),
 ] 

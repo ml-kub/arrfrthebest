@@ -3,7 +3,7 @@ from django.contrib import messages
 import requests
 import json
 from datetime import datetime
-from .models import CompanyData, Notification
+from .models import CompanyData, Notification, Announcement
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
@@ -11,6 +11,9 @@ from django.db import models
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
+from bs4 import BeautifulSoup
+
+DEFAULT_NEWS_IMAGE = '/static/images/default.png'
 
 DEFAULT_ANALYTICS = {
     'risk_assessment': {'score': 0, 'factors': []},
@@ -158,11 +161,35 @@ def profile(request, iin_bin):
                 }
             }
             
+            # Получаем параметры фильтрации
+            reply_type = request.GET.get('reply_type')
+            date_from = request.GET.get('date_from')
+            date_to = request.GET.get('date_to')
+            
             # Получаем уведомления с учетом прав доступа
             notifications = Notification.objects.filter(
                 models.Q(company=company) | models.Q(is_global=True),
                 parent__isnull=True  # Только основные уведомления
-            ).prefetch_related(
+            )
+            
+            if reply_type:
+                notifications = notifications.filter(replies__reply_type=reply_type).distinct()
+            
+            if date_from:
+                try:
+                    date_from = datetime.strptime(date_from, '%Y-%m-%d')
+                    notifications = notifications.filter(created_at__gte=date_from)
+                except ValueError:
+                    pass
+                    
+            if date_to:
+                try:
+                    date_to = datetime.strptime(date_to, '%Y-%m-%d')
+                    notifications = notifications.filter(created_at__lte=date_to)
+                except ValueError:
+                    pass
+            
+            notifications = notifications.prefetch_related(
                 models.Prefetch(
                     'replies',
                     queryset=Notification.objects.filter(
@@ -174,6 +201,8 @@ def profile(request, iin_bin):
             ).order_by('-created_at')
             
             context['notifications'] = notifications
+            context['news'] = get_kapital_news()
+            context['announcements'] = Announcement.objects.filter(is_active=True).order_by('-created_at')
             
             return render(request, 'profile.html', context)
             
@@ -364,6 +393,7 @@ def profile(request, iin_bin):
             }
         )
         
+        context['news'] = get_kapital_news()
         return render(request, 'profile.html', context)
         
     except Exception as e:
@@ -451,10 +481,40 @@ def get_notifications(request, company_id):
 
 @user_passes_test(lambda u: u.is_staff)
 def notifications_management(request):
-    # Получаем все основные уведомления с их ответами
-    notifications = Notification.objects.filter(
-        parent__isnull=True
-    ).prefetch_related(
+    # Получаем параметры фильтрации из запроса
+    reply_type = request.GET.get('reply_type')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    selected_companies = request.GET.getlist('companies')  # Получаем список выбранных компаний
+    
+    # Базовый запрос
+    notifications = Notification.objects.filter(parent__isnull=True)
+    
+    # Применяем фильтры
+    if selected_companies:
+        notifications = notifications.filter(
+            models.Q(company__id__in=selected_companies) |
+            models.Q(is_global=True)  # Включаем глобальные уведомления
+        )
+    
+    if reply_type:
+        notifications = notifications.filter(replies__reply_type=reply_type).distinct()
+    
+    if date_from:
+        try:
+            date_from = datetime.strptime(date_from, '%Y-%m-%d')
+            notifications = notifications.filter(created_at__gte=date_from)
+        except ValueError:
+            pass
+            
+    if date_to:
+        try:
+            date_to = datetime.strptime(date_to, '%Y-%m-%d')
+            notifications = notifications.filter(created_at__lte=date_to)
+        except ValueError:
+            pass
+    
+    notifications = notifications.prefetch_related(
         'replies',
         'company',
         'created_by'
@@ -463,7 +523,14 @@ def notifications_management(request):
     context = {
         'companies': CompanyData.objects.all().order_by('name'),
         'notifications': notifications,
-        'is_admin': True
+        'is_admin': True,
+        'reply_types': Notification.REPLY_TYPES,
+        'selected_filters': {
+            'reply_type': reply_type,
+            'date_from': date_from,
+            'date_to': date_to,
+            'selected_companies': [int(id) for id in selected_companies] if selected_companies else []
+        }
     }
     return render(request, 'notifications_management.html', context)
 
@@ -577,3 +644,154 @@ def admin_login(request):
             return redirect('admin_login')
             
     return render(request, 'admin_login.html')
+
+def get_kapital_news():
+    try:
+        # Примерный URL для запросов (заменить на актуальный)
+        response = requests.get('https://kapital.kz/finance')
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # Ищем все блоки с новостями
+        news_items = soup.select('.main-news__item')
+
+        news_list = []
+        for item in news_items:
+            title_tag = item.select_one('.main-news__name')
+            title = title_tag.text.strip() if title_tag else "Без заголовка"
+            link = title_tag['href'] if title_tag else None
+            link = link if link.startswith("http") else f"https://kapital.kz{link}"
+
+            image_tag = item.select_one('.main-news__img img')
+            image = image_tag['src'] if image_tag else DEFAULT_NEWS_IMAGE
+
+            date_tag = item.select_one('.information-article__date')
+            date = date_tag.text.strip() if date_tag else "Дата неизвестна"
+
+            description_tag = item.select_one('.main-news__anons')
+            description = description_tag.text.strip() if description_tag else "Описание отсутствует"
+
+            tags = [tag.text.strip() for tag in item.select('.main-news__tag a')]
+
+            news_list.append({
+                'title': title,
+                'link': link,
+                'image': image,
+                'date': date,
+                'description': description,
+                'tags': tags
+            })
+
+        return news_list
+
+    except Exception as e:
+        print(f"Ошибка при парсинге новостей: {e}")
+        return []
+
+@user_passes_test(lambda u: u.is_staff)
+def create_announcement(request):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        image = request.FILES.get('image')
+        
+        try:
+            announcement = Announcement.objects.create(
+                title=title,
+                description=description,
+                image=image,
+                created_by=request.user
+            )
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    
+    return JsonResponse({'status': 'error', 'message': 'Метод не поддерживается'})
+
+@user_passes_test(lambda u: u.is_staff)
+def announcements_management(request):
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    selected_tags = request.GET.getlist('tags')
+    
+    announcements = Announcement.objects.all()
+    
+    if date_from:
+        try:
+            date_from = datetime.strptime(date_from, '%Y-%m-%d')
+            announcements = announcements.filter(created_at__gte=date_from)
+        except ValueError:
+            pass
+            
+    if date_to:
+        try:
+            date_to = datetime.strptime(date_to, '%Y-%m-%d')
+            announcements = announcements.filter(created_at__lte=date_to)
+        except ValueError:
+            pass
+            
+    if selected_tags:
+        announcements = announcements.filter(tags__in=selected_tags)
+    
+    context = {
+        'announcements': announcements,
+        'tags': Announcement.TAGS,
+        'selected_filters': {
+            'date_from': date_from,
+            'date_to': date_to,
+            'tags': selected_tags
+        }
+    }
+    return render(request, 'announcements_management.html', context)
+
+@user_passes_test(lambda u: u.is_staff)
+def get_announcement(request, announcement_id):
+    try:
+        announcement = Announcement.objects.get(id=announcement_id)
+        return JsonResponse({
+            'id': announcement.id,
+            'title': announcement.title,
+            'description': announcement.description,
+            'tags': announcement.tags,
+            'is_active': announcement.is_active,
+            'image': announcement.image.url if announcement.image else None
+        })
+    except Announcement.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Объявление не найдено'})
+
+@user_passes_test(lambda u: u.is_staff)
+def edit_announcement(request, announcement_id):
+    if request.method == 'POST':
+        try:
+            announcement = Announcement.objects.get(id=announcement_id)
+            
+            announcement.title = request.POST.get('title', announcement.title)
+            announcement.description = request.POST.get('description', announcement.description)
+            announcement.tags = request.POST.get('tags', announcement.tags)
+            announcement.is_active = request.POST.get('is_active') == 'true'
+            
+            if 'image' in request.FILES:
+                announcement.image = request.FILES['image']
+            
+            announcement.save()
+            return JsonResponse({'status': 'success'})
+        except Announcement.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Объявление не найдено'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    
+    return JsonResponse({'status': 'error', 'message': 'Метод не поддерживается'})
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_announcement(request, announcement_id):
+    if request.method == 'POST':
+        try:
+            announcement = Announcement.objects.get(id=announcement_id)
+            announcement.delete()
+            return JsonResponse({'status': 'success'})
+        except Announcement.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Объявление не найдено'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    
+    return JsonResponse({'status': 'error', 'message': 'Метод не поддерживается'})

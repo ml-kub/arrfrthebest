@@ -391,7 +391,7 @@
             color: #6b7280;
         }
 
-        /* Стили для аналитики */
+        /* Стили для аналитик */
         .analytics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -833,6 +833,137 @@
             margin-bottom: 8px;
             resize: vertical;
         }
+
+        /* Стили для новостей */
+        .news-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .news-item {
+            display: flex;
+            gap: 20px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .news-item:hover {
+            transform: translateX(5px);
+            background: #f1f5f9;
+        }
+
+        .news-image {
+            width: 120px;
+            height: 80px;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .news-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .news-content {
+            flex: 1;
+        }
+
+        .news-content h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            line-height: 1.4;
+        }
+
+        .news-content a {
+            color: #1e293b;
+            text-decoration: none;
+        }
+
+        .news-content a:hover {
+            color: #3b82f6;
+        }
+
+        .news-date {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .announcements-container {
+            display: grid;
+            gap: 24px;
+        }
+
+        .announcement-item {
+            display: flex;
+            gap: 24px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .announcement-image {
+            width: 200px;
+            height: 140px;
+            overflow: hidden;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .announcement-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .announcement-content {
+            flex: 1;
+        }
+
+        .announcement-content h3 {
+            margin: 0 0 12px 0;
+            font-size: 18px;
+            color: var(--gray-800);
+        }
+
+        .announcement-description {
+            color: var(--gray-600);
+            margin: 0 0 16px 0;
+            line-height: 1.5;
+        }
+
+        .announcement-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: var(--gray-600);
+            font-size: 14px;
+        }
+
+        .announcement-date i {
+            margin-right: 6px;
+        }
+
+        .no-announcements {
+            text-align: center;
+            color: var(--gray-600);
+            padding: 40px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .announcement-item {
+                flex-direction: column;
+            }
+            
+            .announcement-image {
+                width: 100%;
+                height: 200px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -873,6 +1004,14 @@
                 {% if analytics.notifications %}
                 <span class="notification-badge">{{ analytics.notifications|length }}</span>
                 {% endif %}
+            </div>
+            <div class="menu-item" data-section="news">
+                <i class="fas fa-newspaper"></i>
+                Новости финансов
+            </div>
+            <div class="menu-item" data-section="announcements">
+                <i class="fas fa-bullhorn"></i>
+                Объявления
             </div>
         </div>
 
@@ -1024,7 +1163,7 @@
 
                         {% if financial_info.payments %}
                         <div class="info-block">
-                            <h3>История платежей</h3>
+                            <h3>Исория платежей</h3>
                             {% for payment in financial_info.payments %}
                                 {% for year, amount in payment.items %}
                                 <div class="info-item">
@@ -1225,7 +1364,7 @@
                                     <h3>Финансовая активность</h3>
                                 </div>
                                 <div class="analytics-value">{{ analytics.financial_activity }}%</div>
-                                <div class="analytics-subtitle">За по��ледний год</div>
+                                <div class="analytics-subtitle">За поледний год</div>
                                 <div class="progress-bar">
                                     <div class="progress" style="width: {{ analytics.financial_activity }}%"></div>
                                 </div>
@@ -1389,9 +1528,61 @@
                             {% endfor %}
                         {% else %}
                             <div class="notification-item info">
-                                <div class="notification-message">Новых уведомлений нет</div>
+                                <div class="notification-message">Новых уведмлений нет</div>
                             </div>
                         {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Секция новостей -->
+            <div id="news-section" class="content-section">
+                <div class="card">
+                    <h2><i class="fas fa-newspaper"></i> Новости </h2>
+                    <div class="news-container">
+                        {% for news_item in news %}
+                        <div class="news-item">
+                            {% if news_item.image %}
+                            <div class="news-image">
+                                <img src="{{ news_item.image }}" alt="{{ news_item.title }}">
+                            </div>
+                            {% endif %}
+                            <div class="news-content">
+                                <h3><a href="{{ news_item.link }}" target="_blank">{{ news_item.title }}</a></h3>
+                                <span class="news-date">{{ news_item.date }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Добавить новую секцию перед закрывающим тегом main-content -->
+            <div id="announcements-section" class="content-section">
+                <div class="card">
+                    <h2><i class="fas fa-bullhorn"></i> Объявления</h2>
+                    <div class="announcements-container">
+                        {% for announcement in announcements %}
+                        <div class="announcement-item">
+                            {% if announcement.image %}
+                            <div class="announcement-image">
+                                <img src="{{ announcement.image.url }}" alt="{{ announcement.title }}">
+                            </div>
+                            {% endif %}
+                            <div class="announcement-content">
+                                <h3>{{ announcement.title }}</h3>
+                                <p class="announcement-description">{{ announcement.description }}</p>
+                                <div class="announcement-meta">
+                                    <span class="announcement-date">
+                                        <i class="far fa-calendar"></i>
+                                        {{ announcement.created_at|date:"d.m.Y" }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="no-announcements">Нет активных объявлений</p>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
