@@ -607,6 +607,111 @@
                 alert('Произошла ошибка при создании объявления');
             });
         });
+
+        // Обработчики для кнопок редактирования и удаления
+        document.addEventListener('DOMContentLoaded', function() {
+            // Удаление объявления
+            document.querySelectorAll('.delete-announcement').forEach(button => {
+                button.addEventListener('click', function() {
+                    if (confirm('Вы уверены, что хотите удалить это объявление?')) {
+                        const announcementId = this.dataset.id;
+                        fetch(`/announcements/delete/${announcementId}/`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                location.reload();
+                            } else {
+                                alert('Ошибка: ' + data.message);
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Редактирование объявления
+            document.querySelectorAll('.edit-announcement').forEach(button => {
+                button.addEventListener('click', function() {
+                    const announcementId = this.dataset.id;
+                    fetch(`/announcements/get/${announcementId}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const modal = document.getElementById('editAnnouncementModal');
+                            document.getElementById('editTitle').value = data.title;
+                            document.getElementById('editDescription').value = data.description;
+                            document.getElementById('editTags').value = data.tags;
+                            document.getElementById('editIsActive').checked = data.is_active;
+                            document.getElementById('editAnnouncementId').value = data.id;
+                            modal.classList.add('active');
+                        });
+                });
+            });
+
+            // Обработка формы редактирования
+            document.getElementById('editAnnouncementForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const announcementId = document.getElementById('editAnnouncementId').value;
+                const formData = new FormData(this);
+
+                fetch(`/announcements/edit/${announcementId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert('Ошибка: ' + data.message);
+                    }
+                });
+            });
+        });
     </script>
+    <!-- Модальное окно редактирования -->
+    <div id="editAnnouncementModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h3>Редактировать объявление</h3>
+            <form id="editAnnouncementForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" id="editAnnouncementId">
+                <div class="form-group">
+                    <label>Заголовок</label>
+                    <input type="text" id="editTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="editDescription" name="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Тег</label>
+                    <select id="editTags" name="tags" required>
+                        {% for tag_value, tag_label in tags %}
+                        <option value="{{ tag_value }}">{{ tag_label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="editIsActive" name="is_active">
+                        Активно
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Изображение</label>
+                    <input type="file" name="image" accept="image/*">
+                </div>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html> 

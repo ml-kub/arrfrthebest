@@ -16,4 +16,7 @@ urlpatterns = [
     path('announcements/<int:announcement_id>/', views.get_announcement, name='get_announcement'),
     path('announcements/<int:announcement_id>/edit/', views.edit_announcement, name='edit_announcement'),
     path('announcements/<int:announcement_id>/delete/', views.delete_announcement, name='delete_announcement'),
+    path('announcements/delete/<int:announcement_id>/', views.delete_announcement, name='delete_announcement'),
+    path('announcements/edit/<int:announcement_id>/', views.edit_announcement, name='edit_announcement'),
+    path('announcements/get/<int:announcement_id>/', views.get_announcement, name='get_announcement'),
 ] 
