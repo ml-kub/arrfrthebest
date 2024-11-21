@@ -94,7 +94,7 @@ def profile(request, iin_bin):
         # Сначала пробуем получить данные из базы
         company = CompanyData.objects.filter(bin_iin=iin_bin).first()
         
-        # Проверяем, есть ли данные и не устарели ли они
+        # Проверяем, есть ли данные и не у��тарели ли они
         if company and (timezone.now() - company.last_updated).days < 1:
             # Используем данные из базы
             context = {
@@ -123,12 +123,12 @@ def profile(request, iin_bin):
                     'quantity': company.licenses_quantity,
                     'actual_date': company.analytics_data.get('licenses', {}).get('relevance_date'),
                 },
-                'inspections': company.analytics_data.get('inspections', {
-                    'degree_of_risk': company.analytics_data.get('risk_assessment', {}).get('degree_of_risk'),
-                    'calculate_date': company.analytics_data.get('risk_assessment', {}).get('calculate_date'),
-                    'start_date': company.analytics_data.get('risk_assessment', {}).get('start_date'),
-                    'finish_date': company.analytics_data.get('risk_assessment', {}).get('finish_date'),
-                }),
+'inspections': {
+    'degree_of_risk': company.analytics_data.get('inspections', {}).get('degree_of_risk', {}).get('degree_of_risk_ru', 'Не указано'),
+    'calculate_date': company.analytics_data.get('inspections', {}).get('degree_of_risk', {}).get('calculate_date'),
+    'start_date': company.analytics_data.get('inspections', {}).get('degree_of_risk', {}).get('start_date'),
+    'finish_date': company.analytics_data.get('inspections', {}).get('degree_of_risk', {}).get('finish_date'),
+},
                 'goszakup': company.analytics_data.get('goszakup', {}),
                 'analytics': {
                     'company_age': company.company_age,
@@ -299,10 +299,10 @@ def profile(request, iin_bin):
                 'actual_date': api_data.get('elicense', {}).get('relevance_date'),
             },
             'inspections': {
-                'degree_of_risk': api_data.get('degree_of_risk', {}).get('degree_of_risk_ru'),
-                'calculate_date': api_data.get('degree_of_risk', {}).get('calculate_date'),
-                'start_date': api_data.get('degree_of_risk', {}).get('start_date'),
-                'finish_date': api_data.get('degree_of_risk', {}).get('finish_date'),
+    'degree_of_risk': api_data.get('degree_of_risk', {}).get('degree_of_risk_ru', 'Не указано'),
+    'calculate_date': api_data.get('degree_of_risk', {}).get('calculate_date'),
+    'start_date': api_data.get('degree_of_risk', {}).get('start_date'),
+    'finish_date': api_data.get('degree_of_risk', {}).get('finish_date'),
             },
             'goszakup': {
                 'is_participant': api_data.get('goszakup', {}).get('is_participant', False),
@@ -421,7 +421,7 @@ def get_company_notifications(api_data):
             if license.get('status') == 'Приостановлена':
                 notifications.append({
                     'type': 'danger',
-                    'message': f'Лицензия {license.get("number")} приостановлена',
+                    'message': f'Лицензия {license.get("number")} пр��остановлена',
                     'date': license.get('date_suspend')
                 })
 

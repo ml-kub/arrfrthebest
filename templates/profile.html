@@ -391,7 +391,7 @@
             color: #6b7280;
         }
 
-        /* Стили для аналитик */
+        /* Стил для аналитик */
         .analytics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -1027,8 +1027,8 @@
                         <div class="status-badge">{{ company_info.status|default:"Статус не указан" }}</div>
                     </div>
                 </div>
-                <a href="{% url 'register' %}" class="logout-btn">
-                    <i class="fas fa-arrow-left"></i> Назад
+                <a href="{% url 'register' %}" class="logout-btn" style="text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> Выйти
                 </a>
             </div>
 
@@ -1073,7 +1073,7 @@
                         </div>
                         <div class="info-item">
                             <div class="label">Степень риска:</div>
-                            <div class="value">{{ company_info.degree_of_risk.degree_of_risk_ru }}</div>
+                            <div class="value">{{ company_info.degree_of_risk.degree_of_risk_ru|default:"Не указано" }}</div>
                         </div>
                         <div class="info-item">
                             <div class="label">Период оценки:</div>
