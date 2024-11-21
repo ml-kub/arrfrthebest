@@ -178,6 +178,17 @@
                    onkeypress="return event.charCode >= 48 && event.charCode <= 57">
             <button type="submit" class="auth-button">Найти информацию</button>
         </form>
+
+        <div style="margin-top: 20px; position: relative;">
+            <hr style="margin: 15px 0;">
+            <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 0 10px; color: #666;">
+            или
+            </span>
+            </div>
+            <a href="{% url 'admin_login' %}" class="auth-button" style="display: inline-block; text-decoration: none; background: linear-gradient(45deg, #2c3e50, #34495e); margin-top: 20px;">
+            Вход для сотрудников
+            </a>
+        </div>
     </div>
 </body>
 </html> 

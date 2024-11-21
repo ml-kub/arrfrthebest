@@ -68,6 +68,7 @@ class Notification(models.Model):
     created_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
     is_global = models.BooleanField(default=False)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+    is_company_reply = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-created_at']
@@ -77,4 +78,6 @@ class Notification(models.Model):
     def __str__(self):
         if self.is_global:
             return f"Глобальное уведомление: {self.message[:50]}"
-        return f"{self.get_type_display()} для {self.company.name}: {self.message[:50]}"
+        if self.company:
+            return f"{self.get_type_display()} для {self.company.name}: {self.message[:50]}"
+        return f"{self.get_type_display()}: {self.message[:50]}"
