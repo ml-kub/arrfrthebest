@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск информации о компании</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Общие стили */
+        body {
+            background: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* Шапка профиля */
+        .profile-header {
+            background: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .profile-header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .company-logo {
+            width: 120px;
+            height: 120px;
+            background: #e9ecef;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: #6c757d;
+            font-weight: bold;
+        }
+
+        .company-info {
+            flex: 1;
+        }
+
+        .company-name {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+
+        .company-status {
+            display: inline-block;
+            padding: 6px 15px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        /* Навигация */
+        .profile-nav {
+            background: white;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-item {
+            padding: 15px 0;
+            color: #666;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+
+        .nav-item.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+
+        /* Контейнер с информацией */
+        .sections-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .section:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .section h3 {
+            color: #1a1a1a;
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section h3::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 18px;
+            background: #007bff;
+            border-radius: 2px;
+        }
+
+        /* Языковое переключение */
+        .lang-switch {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 5px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .lang-switch button {
+            padding: 8px 20px;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lang-switch button.active {
+            background: #007bff;
+            color: white;
+        }
+
+        /* Значения и индикаторы */
+        .status-active {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-inactive {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .value-positive {
+            color: #2e7d32;
+            font-weight: 500;
+        }
+
+        .value-negative {
+            color: #c62828;
+            font-weight: 500;
+        }
+
+        /* Документы */
+        .document-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            color: #007bff;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .document-link:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        /* Основной контент */
+        .main-content {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            gap: 30px;
+        }
+
+        /* Боковая навигация */
+        .sidebar {
+            width: 260px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-menu {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            position: sticky;
+            top: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 20px;
+            color: #666;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 5px;
+        }
+
+        .menu-item i {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .menu-item:hover {
+            background: linear-gradient(45deg, rgba(52, 152, 219, 0.1), rgba(41, 128, 185, 0.1));
+            color: #3498db;
+            transform: translateX(5px);
+        }
+
+        .menu-item.active {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2);
+        }
+
+        /* Контент разделов */
+        .content-sections {
+            flex: 1;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .sections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        /* Анимации */
+        .fade-transition {
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .fade-enter {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .fade-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Дополнительные стили для разделов */
+        .financial-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .financial-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+
+        .financial-label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .trend-up {
+            color: #28a745;
+        }
+
+        .trend-down {
+            color: #dc3545;
+        }
+
+        /* Стили для таблиц */
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 20px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Стили для списка лицензий */
+        .license-item {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.2s;
+        }
+
+        .license-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .license-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .license-number {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .license-date {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        /* Стили для проверок */
+        .check-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .check-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .check-passed {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .check-failed {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .check-info {
+            flex: 1;
+        }
+
+        .check-date {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        /* Стили для контейнеров */
+        .search-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f2f5;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .search-container.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .result-container {
+            min-height: 100vh;
+            background: #f0f2f5;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .result-container.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .loading-container.hidden {
+            display: none;
+        }
+
+        /* Улучшенные стили для проверок */
+        .check-item {
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+        .check-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .check-icon {
+            width: 48px;
+            height: 48px;
+            font-size: 20px;
+        }
+
+        /* Стили для графика */
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        /* Улучшенные стили для финансовых карточек */
+        .financial-card {
+            border-radius: 15px;
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+        .financial-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .financial-value {
+            background: -webkit-linear-gradient(45deg, #2c3e50, #3498db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Изменим отображение статуса в секции госзакупок */
+        .status-text {
+            font-size: 14px;
+            font-weight: 500;
+            padding: 6px 15px;
+            border-radius: 30px;
+        }
+
+        /* Стили для статусов */
+        .status-text {
+            font-size: 18px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        .status-inactive {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-active {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        /* Новые стили для улучшенной визуализации */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 10px 0;
+            background: -webkit-linear-gradient(45deg, #2c3e50, #3498db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Стили для временной шкалы */
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 15px 0 15px 40px;
+            border-left: 2px solid #e0e0e0;
+            margin-left: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -9px;
+            top: 50%;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #007bff;
+            transform: translateY(-50%);
+        }
+
+        .timeline-date {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .timeline-content {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Стили для аналитики */
+        .risk-analysis {
+            display: grid;
+            gap: 15px;
+        }
+
+        .risk-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .risk-low {
+            border-color: #4caf50;
+        }
+
+        .risk-medium {
+            border-color: #ff9800;
+        }
+
+        .risk-high {
+            border-color: #f44336;
+        }
+
+        .financial-analysis {
+            display: grid;
+            gap: 20px;
+        }
+
+        .financial-indicator {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .indicator-value {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        .indicator-trend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .trend-positive {
+            color: #4caf50;
+        }
+
+        .trend-negative {
+            color: #f44336;
+        }
+
+        /* Улучшенные стили для статистики */
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #007bff, #00ff88);
+        }
+
+        .stat-description {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Классы для индекса надежности */
+        .reliability-high {
+            color: #4caf50;
+        }
+
+        .reliability-medium {
+            color: #ff9800;
+        }
+
+        .reliability-low {
+            color: #f44336;
+        }
+
+        /* Стили для формы поиска */
+        .auth-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .auth-header {
+            margin-bottom: 30px;
+        }
+
+        .auth-header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 10px;
+            background: -webkit-linear-gradient(45deg, #2c3e50, #3498db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .auth-header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .auth-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            outline: none;
+        }
+
+        .auth-button {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        /* Стили для кнопки выхода */
+        .exit-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .exit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .exit-button i {
+            font-size: 16px;
+        }
+
+        /* Стили для ошибок */
+        .error-message {
+            color: #e74c3c;
+            background: #fde8e7;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error-message.visible {
+            display: block;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid p-0">
+        <!-- Форма поиска (изначально видима) -->
+        <div id="search-container" class="search-container">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <h1>Поиск информации о компании</h1>
+                    <p>Введите БИН или ИИН для получения данных</p>
+                </div>
+                <div class="auth-form">
+                    <input type="text" 
+                           class="auth-input" 
+                           id="binInput" 
+                           placeholder="Введите ИИН или БИН (12 цифр)" 
+                           maxlength="12"
+                           autocomplete="off">
+                    <button class="auth-button" type="button" onclick="searchCompany()">
+                        Найти информацию
+                    </button>
+                    <div id="errorMessage" class="error-message hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Индикато загрузки -->
+        <div id="loading" class="loading-container hidden">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+        </div>
+
+        <!-- Результаты поиска (изначально скрыты) -->
+        <div id="result" class="result-container hidden">
+            <!-- Контент будет добавлен динамчески -->
+        </div>
+    </div>
+
+    <script>
+        const API_TOKEN = '941aa840c0a2461cade68aa4ebf63f64';
+        const API_URL = 'https://pk.uchet.kz/api/v2/get_bin_info/';
+
+        function switchLanguage(lang) {
+            document.querySelectorAll('.ru-content').forEach(el => {
+                el.style.display = lang === 'ru' ? 'block' : 'none';
+            });
+            document.querySelectorAll('.kz-content').forEach(el => {
+                el.style.display = lang === 'kz' ? 'block' : 'none';
+            });
+        }
+
+        function formatMoney(amount) {
+            if (!amount || isNaN(amount)) return '0 ₸';
+            return new Intl.NumberFormat('ru-RU').format(amount) + ' ₸';
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Нет данных';
+            return new Date(dateString).toLocaleString('ru-RU');
+        }
+
+        function displayData(data) {
+            const result = document.getElementById('result');
+            result.innerHTML = ''; // Очищам контейнер
+
+            // Создаем основную структуру
+            const headerHtml = `
+                <div class="profile-header">
+                    <button class="exit-button" onclick="backToSearch()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Выйти
+                    </button>
+                    <div class="profile-header-content">
+                        <div class="company-logo">
+                            ${data.name_ru.charAt(0)}
+                        </div>
+                        <div class="company-info">
+                            <div class="company-name">${data.name_ru}</div>
+                            <span class="company-status ${data.status.toLowerCase().includes('действующ') ? 'status-active' : 'status-inactive'}">
+                                ${data.status}
+                            </span>
+                            <div class="company-bin">БИН: ${data.bin || data.iin}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="main-content">
+                    <!-- Боковая навигация -->
+                    <div class="sidebar">
+                        <div class="sidebar-menu">
+                            <div class="menu-item active" data-section="main">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Основная информация</span>
+                            </div>
+                            <div class="menu-item" data-section="finance">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Финансы</span>
+                            </div>
+                            <div class="menu-item" data-section="documents">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Документы</span>
+                            </div>
+                            <div class="menu-item" data-section="licenses">
+                                <i class="fas fa-certificate"></i>
+                                <span>Лицензии</span>
+                            </div>
+                            <div class="menu-item" data-section="checks">
+                                <i class="fas fa-tasks"></i>
+                                <span>Проверки</span>
+                            </div>
+                            <div class="menu-item" data-section="goszakup">
+                                <i class="fas fa-handshake"></i>
+                                <span>Госзакупки</span>
+                            </div>
+                            <div class="menu-item" data-section="analytics">
+                                <i class="fas fa-chart-pie"></i>
+                                <span>Аналитика</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Контент разделов -->
+                    <div class="content-sections">
+                        <!-- Основная информация -->
+                        <div id="main-section" class="content-section active">
+                            <div class="sections-grid">
+                                <div class="section">
+                                    <h3>Основные данные</h3>
+                                    <div id="mainInfo-ru" class="ru-content">
+                                        <p><strong>Наименование:</strong> ${data.name_ru}</p>
+                                        <p><strong>БИН/ИИН:</strong> ${data.bin || data.iin}</p>
+                                        <p><strong>Статус:</strong> <span class="status-indicator ${data.status.toLowerCase().includes('действующ') ? 'status-active' : 'status-inactive'}">${data.status}</span></p>
+                                        <p><strong>Руководитель:</strong> ${data.head_fullname || 'Не указан'}</p>
+                                        <p><strong>Дата регистрации:</strong> ${data.registration_date || 'Не указана'}</p>
+                                    </div>
+                                </div>
+                                <div class="section">
+                                    <h3>Контактные данные</h3>
+                                    <div id="contactInfo-ru" class="ru-content">
+                                        <p><strong>Адрес:</strong> ${data.address_ru || data.goszakup?.address?.[0]?.address || 'Не указан'}</p>
+                                        <p><strong>Телефон:</strong> ${formatPhoneNumber(data.goszakup?.phone)}</p>
+                                        <p><strong>Email:</strong> ${data.goszakup?.email || 'Не указан'}</p>
+                                        ${data.goszakup?.website ? `<p><strong>Веб-сайт:</strong> <a href="${data.goszakup.website}" target="_blank">${data.goszakup.website}</a></p>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Финансы -->
+                        <div id="finance-section" class="content-section">
+                            <div class="sections-grid">
+                                <div class="section">
+                                    <h3><i class="fas fa-chart-line"></i> Финансовые показатели</h3>
+                                    <div class="financial-card">
+                                        <div class="financial-label">Налоговая задолженность</div>
+                                        <div class="financial-value">
+                                            ${formatMoney(data.tax_debt?.total_tax_arrear || 0)}
+                                        </div>
+                                    </div>
+                                    <div class="financial-card">
+                                        <div class="financial-label">Пенсионные отчисления</div>
+                                        <div class="financial-value">
+                                            ${formatMoney(data.tax_debt?.pension_contribution_arrear || 0)}
+                                        </div>
+                                    </div>
+                                    <div class="financial-card">
+                                        <div class="financial-label">Социальные отчисления</div>
+                                        <div class="financial-value">
+                                            ${formatMoney(data.tax_debt?.social_contribution_arrear || 0)}
+                                        </div>
+                                    </div>
+                                    ${data.payments_totals?.totals ? `
+                                        <div class="mt-4">
+                                            <h4>История платежей</h4>
+                                            <div class="chart-container" style="position: relative; height:300px; margin-bottom: 20px;">
+                                                <canvas id="paymentsChart"></canvas>
+                                            </div>
+                                            <table class="data-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Год</th>
+                                                        <th>Сумма</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${data.payments_totals.totals.map(year => {
+                                                        const yearData = Object.entries(year)[0];
+                                                        return `
+                                                            <tr>
+                                                                <td>${yearData[0]}</td>
+                                                                <td>${formatMoney(yearData[1])}</td>
+                                                            </tr>
+                                                        `;
+                                                    }).join('')}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    ` : '<p>История платежей отсутствует</p>'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Документы -->
+                        <div id="documents-section" class="content-section">
+                            <div class="sections-grid">
+                                <div class="section">
+                                    <h3><i class="fas fa-file-alt"></i> Документы</h3>
+                                    ${data.e034?.document_url_ru || data.e080?.document_url_ru || data.e083?.document_url_ru ? `
+                                        <div class="document-links">
+                                            ${data.e034?.document_url_ru ? `
+                                                <div class="document-link">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                    <a href="${data.e034.document_url_ru}" target="_blank">Справка о регистрации</a>
+                                                </div>
+                                            ` : ''}
+                                            ${data.e080?.document_url_ru ? `
+                                                <div class="document-link">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                    <a href="${data.e080.document_url_ru}" target="_blank">Справка о юр. лице</a>
+                                                </div>
+                                            ` : ''}
+                                            ${data.e083?.document_url_ru ? `
+                                                <div class="document-link">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                    <a href="${data.e083.document_url_ru}" target="_blank">Справка об обременениях</a>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    ` : '<p>Документы не найдены</p>'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Лицензии -->
+                        <div id="licenses-section" class="content-section">
+                            <div class="sections-grid">
+                                <div class="section">
+                                    <h3><i class="fas fa-certificate"></i> Лицензии</h3>
+                                    ${data.elicense ? `
+                                        <div class="license-item">
+                                            <div class="license-info">
+                                                <p><strong>Наличие лицензий:</strong> ${data.elicense.has_licenses ? 'Да' : 'Нет'}</p>
+                                                <p><strong>Количество:</strong> ${data.elicense.quantity || 0}</p>
+                                                <p><strong>Дата актуальности:</strong> ${formatDate(data.elicense.relevance_date)}</p>
+                                            </div>
+                                        </div>
+                                    ` : '<p>Информация о лицензиях не найдена</p>'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Проверки -->
+                        <div id="checks-section" class="content-section">
+                            <div class="sections-grid">
+                                <div class="section">
+                                    <h3><i class="fas fa-tasks"></i> Проверки и статусы</h3>
+                                    <div class="checks-list">
+                                        <div class="check-item">
+                                            <div class="check-icon ${data.goszakup_unreliable?.is_unreliable ? 'check-failed' : 'check-passed'}">
+                                                <i class="fas ${data.goszakup_unreliable?.is_unreliable ? 'fa-times' : 'fa-check'}"></i>
+                                            </div>
+                                            <div class="check-info">
+                                                <p><strong>Недобросовестный участник госзакупок:</strong> ${data.goszakup_unreliable?.is_unreliable ? 'Да' : 'Нет'}</p>
+                                                <span class="check-date">${formatDate(data.goszakup_unreliable?.relevance_date)}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="check-item">
+                                            <div class="check-icon ${data.tax_debt?.total_tax_arrear > 0 ? 'check-failed' : 'check-passed'}">
+                                                <i class="fas ${data.tax_debt?.total_tax_arrear > 0 ? 'fa-times' : 'fa-check'}"></i>
+                                            </div>
+                                            <div class="check-info">
+                                                <p><strong>Налоговая задолженность:</strong> ${data.tax_debt?.total_tax_arrear > 0 ? 'Имеется' : 'Отсутствует'}</p>
+                                                <span class="check-date">Сумма: ${formatMoney(data.tax_debt?.total_tax_arrear || 0)}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="check-item">
+                                            <div class="check-icon ${data.bankrupt?.is_bankrupt ? 'check-failed' : 'check-passed'}">
+                                                <i class="fas ${data.bankrupt?.is_bankrupt ? 'fa-times' : 'fa-check'}"></i>
+                                            </div>
+                                            <div class="check-info">
+                                                <p><strong>Банкротство:</strong> ${data.bankrupt?.is_bankrupt ? 'В процессе' : 'Нет'}</p>
+                                                <span class="check-date">${formatDate(data.bankrupt?.relevance_date)}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="check-item">
+                                            <div class="check-icon ${data.inactive?.is_inactive ? 'check-failed' : 'check-passed'}">
+                                                <i class="fas ${data.inactive?.is_inactive ? 'fa-times' : 'fa-check'}"></i>
+                                            </div>
+                                            <div class="check-info">
+                                                <p><strong>Статус активности:</strong> ${data.inactive?.is_inactive ? 'Неактивен' : 'Активен'}</p>
+                                                <span class="check-date">${formatDate(data.inactive?.relevance_date)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Госзакупки -->
+                        <div id="goszakup-section" class="content-section">
+                            <div class="sections-grid">
+                                <div class="section">
+                                    <h3><i class="fas fa-handshake"></i> Участие в госзакупках</h3>
+                                    ${data.goszakup ? `
+                                        <div class="goszakup-stats">
+                                            <div class="financial-card">
+                                                <div class="financial-label">Статус участника</div>
+                                                <div class="status-text ${data.goszakup.is_participant ? 'status-inactive' : 'status-active'}">
+                                                    ${data.goszakup.is_participant ? 'Активный участник' : 'Не участвует'}
+                                                </div>
+                                            </div>
+                                            <div class="financial-card">
+                                                <div class="financial-label">Дата регистрации</div>
+                                                <div class="financial-value">
+                                                    ${formatDate(data.goszakup.regdate)}
+                                                </div>
+                                            </div>
+                                            ${data.goszakup.customer_name_ru ? `
+                                                <div class="financial-card">
+                                                    <div class="financial-label">Заказчик</div>
+                                                    <div class="financial-value">
+                                                        ${data.goszakup.customer_name_ru}
+                                                    </div>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                        ${data.goszakup.contracts ? `
+                                            <div class="mt-4">
+                                                <h4>Контракты</h4>
+                                                <table class="data-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Номер</th>
+                                                            <th>Дата</th>
+                                                            <th>Сумма</th>
+                                                            <th>Статус</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        ${data.goszakup.contracts.map(contract => `
+                                                            <tr>
+                                                                <td>${contract.number}</td>
+                                                                <td>${formatDate(contract.date)}</td>
+                                                                <td>${formatMoney(contract.amount)}</td>
+                                                                <td>
+                                                                    <span class="status-indicator ${contract.status === 'active' ? 'status-active' : 'status-inactive'}">
+                                                                        ${contract.status}
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        `).join('')}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        ` : ''}
+                                    ` : '<p>Информация о госзакупках не найдена</p>'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Аналитика -->
+                        <div id="analytics-section" class="content-section">
+                            <div class="sections-grid">
+                                <!-- Основные показатели -->
+                                <div class="section">
+                                    <h3><i class="fas fa-chart-pie"></i> Ключевые показатели</h3>
+                                    <div class="stats-grid">
+                                        <div class="stat-card">
+                                            <div class="stat-label">Возраст компании</div>
+                                            <div class="stat-value">${calculateCompanyAge(data.registration_date)} лет</div>
+                                            <div class="stat-description">С момента регистрации</div>
+                                        </div>
+                                        <div class="stat-card">
+                                            <div class="stat-label">Индекс надежности</div>
+                                            <div class="stat-value ${getReliabilityClass(calculateReliabilityIndex(data))}">
+                                                ${calculateReliabilityIndex(data)}%
+                                            </div>
+                                            <div class="stat-description">На основе проверок</div>
+                                        </div>
+                                        <div class="stat-card">
+                                            <div class="stat-label">Финансовая активность</div>
+                                            <div class="stat-value">${calculateFinancialActivity(data)}%</div>
+                                            <div class="stat-description">За последний год</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Риск-анализ -->
+                                <div class="section">
+                                    <h3><i class="fas fa-exclamation-triangle"></i> Анализ рисков</h3>
+                                    <div class="risk-analysis">
+                                        ${generateRiskAnalysis(data)}
+                                    </div>
+                                </div>
+
+                                <!-- История изменений -->
+                                <div class="section">
+                                    <h3><i class="fas fa-history"></i> История изменений</h3>
+                                    <div class="timeline">
+                                        ${generateTimeline(data)}
+                                    </div>
+                                </div>
+
+                                <!-- Финансовые показатели -->
+                                <div class="section">
+                                    <h3><i class="fas fa-money-bill-wave"></i> Финансовый анализ</h3>
+                                    <div class="financial-analysis">
+                                        ${generateFinancialAnalysis(data)}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            result.innerHTML = headerHtml;
+            result.classList.remove('hidden');
+            document.getElementById('search-container').classList.add('hidden');
+
+            // Добавляем обработчики для навигации
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    // Обновляем активный пункт меню
+                    document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    // Показываем соответствующий раздел
+                    const sectionId = item.dataset.section + '-section';
+                    document.querySelectorAll('.content-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    document.getElementById(sectionId)?.classList.add('active');
+                });
+            });
+
+            if (data.payments_totals?.totals) {
+                const years = [];
+                const amounts = [];
+                data.payments_totals.totals.forEach(year => {
+                    const [yearNum, amount] = Object.entries(year)[0];
+                    years.push(yearNum);
+                    amounts.push(amount);
+                });
+
+                const ctx = document.getElementById('paymentsChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: years,
+                        datasets: [{
+                            label: 'Сумма платежей',
+                            data: amounts,
+                            backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                            borderColor: 'rgba(0, 123, 255, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatMoney(value);
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return formatMoney(context.raw);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function validateBin(bin) {
+            return bin.length === 12 && /^\d+$/.test(bin);
+        }
+
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.classList.add('visible');
+            setTimeout(() => {
+                errorElement.classList.remove('visible');
+            }, 3000);
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').classList.add('hidden');
+        }
+
+        async function searchCompany() {
+            const number = document.getElementById('binInput').value;
+            const searchContainer = document.getElementById('search-container');
+            const loadingContainer = document.getElementById('loading');
+            const resultContainer = document.getElementById('result');
+            
+            hideError();
+
+            if (!/^\d{12}$/.test(number)) {
+                showError('Номер должен состоять из 12 цифр');
+                return;
+            }
+
+            try {
+                // Показываем загрузку
+                loadingContainer.classList.remove('hidden');
+                
+                // Сначала робуем получить даные по ИИН
+                let response = await fetch(`${API_URL.replace('get_bin_info', 'get_iin_info')}?token=${API_TOKEN}&iin=${number}`, {
+                    headers: {
+                        'accept': 'application/json'
+                    }
+                });
+
+                // Если по ИИН данные не найдены, пробуем по БИН
+                if (!response.ok) {
+                    response = await fetch(`${API_URL}?token=${API_TOKEN}&bin=${number}`, {
+                        headers: {
+                            'accept': 'application/json'
+                        }
+                    });
+                }
+
+                if (!response.ok) {
+                    throw new Error('Данные не найдены');
+                }
+
+                const data = await response.json();
+                console.log('API Response:', data);
+                
+                // Скрываем форму поиска
+                searchContainer.classList.add('hidden');
+                
+                // Отображаем результаты
+                resultContainer.classList.remove('hidden');
+                resultContainer.classList.add('visible');
+                
+                // Отображаем данные
+                displayData(data);
+
+            } catch (error) {
+                showError('Произошла ошибка при получении данных: ' + error.message);
+            } finally {
+                loadingContainer.classList.add('hidden');
+            }
+        }
+
+        // Функция для возврата к поиску
+        function backToSearch() {
+            document.getElementById('search-container').classList.remove('hidden');
+            document.getElementById('result').classList.remove('visible');
+            document.getElementById('result').classList.add('hidden');
+            document.getElementById('binInput').value = '';
+        }
+
+        // Добавляем обработчик Enter для поля ввода
+        document.getElementById('binInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchCompany();
+            }
+        });
+
+        // Добавляем функцию для проверки доступности документов
+        async function checkDocumentAvailability(url) {
+            if (!url) return false;
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                return response.ok;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        // Добавляем обработчик для навигации
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('nav-item')) {
+                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                e.target.classList.add('active');
+            }
+        });
+
+        // Обработчик навигации
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                // Обновляем активный пункт меню
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                // Показываем соответствующий раздел
+                const sectionId = item.dataset.section + '-section';
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(sectionId).classList.add('active');
+            });
+        });
+
+        // Вспомогательные функции
+        function getFinancialTrend(trend) {
+            if (!trend) return '';
+            return trend > 0 
+                ? `<i class="fas fa-arrow-up trend-up"></i> +${trend}%`
+                : `<i class="fas fa-arrow-down trend-down"></i> ${trend}%`;
+        }
+
+        function formatPhoneNumber(phone) {
+            if (!phone) return 'Не указан';
+            return phone.replace(/(\d{3})(\d{3})(\d{4})/, '+7 ($1) $2-$3');
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Нет данных';
+            return new Date(dateString).toLocaleDateString('ru-RU', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        // Добавляем анимации при переключении разделов
+        function switchSection(sectionId) {
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                if (section.id === sectionId) {
+                    section.classList.add('fade-enter');
+                    section.classList.add('active');
+                    requestAnimationFrame(() => {
+                        section.classList.add('fade-enter-active');
+                        setTimeout(() => {
+                            section.classList.remove('fade-enter');
+                            section.classList.remove('fade-enter-active');
+                        }, 300);
+                    });
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+        }
+
+        // Обработчик переключения языка
+        function switchLanguage(lang) {
+            const buttons = document.querySelectorAll('.lang-switch button');
+            buttons.forEach(button => {
+                button.classList.toggle('active', button.onclick.toString().includes(lang));
+            });
+
+            document.querySelectorAll('.ru-content, .kz-content').forEach(el => {
+                el.classList.toggle('hidden', !el.classList.contains(`${lang}-content`));
+            });
+        }
+
+        // Функция расчета возраста компании
+        function calculateCompanyAge(registrationDate) {
+            if (!registrationDate) return 0;
+            const regDate = new Date(registrationDate);
+            const today = new Date();
+            return Math.floor((today - regDate) / (365.25 * 24 * 60 * 60 * 1000));
+        }
+
+        // Функция расчета активности в госзакупках
+        function calculateGoszakupActivity(contracts) {
+            if (!contracts || !contracts.length) return 0;
+            const activeContracts = contracts.filter(c => c.status === 'active').length;
+            return Math.round((activeContracts / contracts.length) * 100);
+        }
+
+        // Функция расчета индекса надежности
+        function calculateReliabilityIndex(data) {
+            let score = 100;
+            
+            // Снижаем балл за налоговые задолженности
+            if (data.tax_debt?.total_tax_arrear > 0) {
+                score -= 20;
+            }
+            
+            // Снижаем балл за статус недобросовестного участника
+            if (data.goszakup_unreliable?.is_unreliable) {
+                score -= 30;
+            }
+            
+            // Снижаем балл за банкротство
+            if (data.bankrupt?.is_bankrupt) {
+                score -= 50;
+            }
+            
+            // Снижаем балл за неактивность
+            if (data.inactive?.is_inactive) {
+                score -= 40;
+            }
+
+            return Math.max(0, score);
+        }
+
+        // Функция генерации временной шкалы
+        function generateTimeline(data) {
+            const events = [];
+            
+            if (data.registration_date) {
+                events.push({
+                    date: data.registration_date,
+                    content: 'Регистрация компании'
+                });
+            }
+            
+            if (data.goszakup?.regdate) {
+                events.push({
+                    date: data.goszakup.regdate,
+                    content: 'Регистрация в системе госзакупок'
+                });
+            }
+
+            // Сортируем события по дате
+            events.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            return events.map(event => `
+                <div class="timeline-item">
+                    <div class="timeline-date">${formatDate(event.date)}</div>
+                    <div class="timeline-content">${event.content}</div>
+                </div>
+            `).join('');
+        }
+
+        // Функция для определения класса надежности
+        function getReliabilityClass(index) {
+            if (index >= 70) return 'reliability-high';
+            if (index >= 40) return 'reliability-medium';
+            return 'reliability-low';
+        }
+
+        // Функция расчета финансовой активности
+        function calculateFinancialActivity(data) {
+            if (!data.payments_totals?.totals) return 0;
+            const currentYear = new Date().getFullYear();
+            const lastYearPayments = data.payments_totals.totals.find(year => 
+                Object.keys(year)[0] === currentYear.toString()
+            );
+            return lastYearPayments ? Math.min(100, Object.values(lastYearPayments)[0] / 1000000) : 0;
+        }
+
+        // Функция генерации анализа рисков
+        function generateRiskAnalysis(data) {
+            const risks = [
+                {
+                    title: 'Финансовые риски',
+                    level: data.tax_debt?.total_tax_arrear > 0 ? 'high' : 'low',
+                    description: data.tax_debt?.total_tax_arrear > 0 
+                        ? 'Имеется налоговая задолженность'
+                        : 'Налоговая задолженность отсутствует'
+                },
+                {
+                    title: 'Юридические риски',
+                    level: data.bankrupt?.is_bankrupt ? 'high' : 'low',
+                    description: data.bankrupt?.is_bankrupt
+                        ? 'Компания в процессе банкротства'
+                        : 'Юридических рисков не обнаружено'
+                },
+                {
+                    title: 'Риски в госзакупках',
+                    level: data.goszakup_unreliable?.is_unreliable ? 'high' : 'low',
+                    description: data.goszakup_unreliable?.is_unreliable
+                        ? 'Недобросовестный участник госзакупок'
+                        : 'Надежный участник госзакупок'
+                }
+            ];
+
+            return risks.map(risk => `
+                <div class="risk-item risk-${risk.level}">
+                    <div>
+                        <h4>${risk.title}</h4>
+                        <p>${risk.description}</p>
+                    </div>
+                    <div class="risk-indicator">
+                        <i class="fas ${risk.level === 'low' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Функция генерации финансового анализа
+        function generateFinancialAnalysis(data) {
+            if (!data.payments_totals?.totals) return '<p>Нет данных для анализа</p>';
+
+            const years = data.payments_totals.totals.map(year => Object.entries(year)[0]);
+            const lastTwoYears = years.slice(-2);
+            
+            if (lastTwoYears.length < 2) return '<p>Недостаточно даннх для анализа</p>';
+
+            const [prevYear, currentYear] = lastTwoYears;
+            const trend = ((currentYear[1] - prevYear[1]) / prevYear[1]) * 100;
+
+            return `
+                <div class="financial-indicator">
+                    <h4>Динамика платежей</h4>
+                    <div class="indicator-value">${formatMoney(currentYear[1])}</div>
+                    <div class="indicator-trend ${trend >= 0 ? 'trend-positive' : 'trend-negative'}">
+                        <i class="fas ${trend >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+                        ${Math.abs(trend).toFixed(1)}% по сравнению с ${prevYear[0]}
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html> 
+</rewritten_file> 

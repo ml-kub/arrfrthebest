@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Поиск информации</title>
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f2f5;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        user agent stylesheet
+        body {
+            display: block;
+            margin: 8px;
+        }
+
+        .auth-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .auth-header {
+            margin-bottom: 30px;
+        }
+
+        .auth-header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 10px;
+            background: -webkit-linear-gradient(45deg, #2c3e50, #3498db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .auth-header p {
+            color: #666;
+            font-size: 16px;
+        }
+        .auth-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        button, input, optgroup, select, textarea {
+            margin: 0;
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+        }
+        *, ::after, ::before {
+            box-sizing: border-box;
+        }
+        user agent stylesheet
+        input:not([type="image" i], [type="range" i], [type="checkbox" i], [type="radio" i]) {
+            overflow-clip-margin: 0px !important;
+            overflow: clip !important;
+        }
+        user agent stylesheet
+        input[type="text" i] {
+            padding-block: 1px;
+            padding-inline: 2px;
+        }
+        .auth-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        .auth-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .auth-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            outline: none;
+        }
+
+        .auth-button {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+        .message.success {
+            background-color: #ECFDF5;
+            color: #065F46;
+        }
+
+        .message.error {
+            background-color: #FEF2F2;
+            color: #991B1B;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1>Поиск информации о компании</h1>
+            <p>Введите БИН или ИИН для получения данных</p>
+        </div>
+        
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <form method="POST">
+            {% csrf_token %}
+            <input type="text" 
+                   name="iin_bin" 
+                   class="auth-input" 
+                   placeholder="Введите ИИН или БИН (12 цифр)" 
+                   required 
+                   pattern="\d{12}"
+                   maxlength="12"
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                   onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+            <button type="submit" class="auth-button">Найти информацию</button>
+        </form>
+    </div>
+</body>
+</html> 
