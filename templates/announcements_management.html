@@ -1,0 +1,612 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление объявлениями</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 8px;
+        }
+
+        .page-description {
+            color: var(--gray-600);
+            font-size: 1.125rem;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-600);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Стили для списка объявлений */
+        .announcements-list {
+            display: grid;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .announcement-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .announcement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .announcement-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .announcement-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            padding: 8px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            color: var(--gray-600);
+            background: var(--gray-100);
+        }
+
+        .btn-icon:hover {
+            background: var(--gray-200);
+            color: var(--gray-800);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* Стили для модального окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray-600);
+        }
+
+        /* Базовые стили */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            color: var(--gray-800);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Стили боковой панели */
+        .sidebar {
+            background: white;
+            padding: 24px;
+            border-right: 1px solid var(--gray-200);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            color: var(--gray-600);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--gray-100);
+            color: var(--primary-color);
+        }
+
+        /* Стили основного контента */
+        .main-content {
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        /* Стили форм */
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+        /* Стили кнопок */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Стили карточек */
+        .announcement-form, .announcement-filters {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+
+        .form-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            color: var(--gray-800);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        /* Стили фильтров */
+        .date-range {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tag-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag-checkbox {
+            padding: 6px 12px;
+            border-radius: 16px;
+            background: var(--gray-100);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .tag-checkbox.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Стили списка объявлений */
+        .announcements-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .announcement-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .logout-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        background-color: #ef4444;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .logout-btn:hover {
+        background-color: #dc2626;
+        transform: translateY(-1px);
+    }
+
+    .logout-btn i {
+        font-size: 1.1rem;
+    }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Стили для истории объявлений */
+        .announcements-history {
+            margin-top: 32px;
+        }
+
+        .announcements-history h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 16px;
+        }
+
+        .announcement-meta {
+            display: flex;
+            gap: 16px;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        .announcement-content {
+            margin-top: 16px;
+        }
+
+        .announcement-image {
+            margin-bottom: 16px;
+        }
+
+        .announcement-image img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        .announcement-description {
+            color: var(--gray-700);
+            line-height: 1.5;
+        }
+
+        .announcement-footer {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .tag {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .tag-important { background: #fee2e2; color: #dc2626; }
+        .tag-news { background: #e0e7ff; color: #4f46e5; }
+        .tag-update { background: #d1fae5; color: #059669; }
+        .tag-event { background: #fef3c7; color: #d97706; }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status.active {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .status:not(.active) {
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px;
+            background: white;
+            border-radius: 12px;
+            color: var(--gray-600);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            color: var(--gray-400);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Боковое меню -->
+        <div class="sidebar">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                Панель управления
+            </div>
+            
+            <div class="nav-section">
+                <a href="{% url 'notifications_management' %}" class="nav-link">
+                    <i class="fas fa-bell"></i>
+                    Уведомления
+                </a>
+                <a href="{% url 'announcements_management' %}" class="nav-link active">
+                    <i class="fas fa-bullhorn"></i>
+                    Объявления
+                </a>
+                <a href="{% url 'logout' %}" class="logout-btn" style="margin-top: 50px; text-decoration: none;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Выйти
+                </a>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
+        <div class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Управление объявлениями</h1>
+                <p class="page-description">Создавайте и управляйте объявлениями</p>
+            </div>
+
+            <!-- Форма создания объявления -->
+            <div class="announcement-form">
+                <h2 class="form-title">
+                    <i class="fas fa-bullhorn"></i>
+                    Создать объявление
+                </h2>
+                <form id="announcementForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Заголовок</label>
+                        <input type="text" name="title" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Описание</label>
+                        <textarea name="description" class="form-control" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Изображение</label>
+                        <input type="file" name="image" class="form-control" accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <label>Тег</label>
+                        <select name="tags" class="form-control" required>
+                            {% for tag_value, tag_label in tags %}
+                            <option value="{{ tag_value }}">{{ tag_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Создать объявление
+                    </button>
+                </form>
+            </div>
+
+            <!-- Фильтры -->
+            <div class="announcement-filters">
+                <h3>Фильтры</h3>
+                <form method="GET" class="filters-form">
+                    <div class="filters-grid">
+                        <div class="form-group">
+                            <label>Период:</label>
+                            <div class="date-range">
+                                <input type="date" name="date_from" class="form-control" 
+                                       value="{{ selected_filters.date_from|date:'Y-m-d' }}">
+                                <span>—</span>
+                                <input type="date" name="date_to" class="form-control"
+                                       value="{{ selected_filters.date_to|date:'Y-m-d' }}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Теги:</label>
+                            <div class="tag-filter">
+                                {% for tag_value, tag_label in tags %}
+                                <label class="tag-checkbox {% if tag_value in selected_filters.tags %}active{% endif %}">
+                                    <input type="checkbox" name="tags" value="{{ tag_value }}"
+                                           {% if tag_value in selected_filters.tags %}checked{% endif %}>
+                                    {{ tag_label }}
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Применить фильтры
+                    </button>
+                </form>
+            </div>
+
+            <div class="announcements-history">
+                <h3>История объявлений</h3>
+                <div class="announcements-list">
+                    {% for announcement in announcements %}
+                    <div class="announcement-card">
+                        <div class="announcement-header">
+                            <div class="announcement-info">
+                                <h4 class="announcement-title">{{ announcement.title }}</h4>
+                                <div class="announcement-meta">
+                                    <span class="tag tag-{{ announcement.tags }}">{{ announcement.get_tags_display }}</span>
+                                    <span class="date">{{ announcement.created_at|naturaltime }}</span>
+                                    <span class="author">{{ announcement.created_by.get_full_name|default:announcement.created_by.username }}</span>
+                                </div>
+                            </div>
+                            <div class="announcement-actions">
+                                <button class="btn-icon edit-announcement" data-id="{{ announcement.id }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon btn-danger delete-announcement" data-id="{{ announcement.id }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="announcement-content">
+                            {% if announcement.image %}
+                            <div class="announcement-image">
+                                <img src="{{ announcement.image.url }}" alt="{{ announcement.title }}">
+                            </div>
+                            {% endif %}
+                            <p class="announcement-description">{{ announcement.description }}</p>
+                        </div>
+                        <div class="announcement-footer">
+                            <span class="status {% if announcement.is_active %}active{% endif %}">
+                                {% if announcement.is_active %}Активно{% else %}Неактивно{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>Объявлений пока нет</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Обработка формы создания объявления
+        document.getElementById('announcementForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch('/announcements/create/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Очищаем форму
+                    this.reset();
+                    // Перезагружаем страницу для отображения нового объявления
+                    location.reload();
+                } else {
+                    alert('Ошибка: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Произошла ошибка при создании объявления');
+            });
+        });
+    </script>
+</body>
+</html> 

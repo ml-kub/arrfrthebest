@@ -440,31 +440,32 @@ def get_company_notifications(api_data):
 @login_required
 def create_notification(request):
     if request.method == 'POST':
-        company_id = request.POST.get('company_id')
         message = request.POST.get('message')
         notification_type = request.POST.get('type', 'info')
+        is_global = request.POST.get('is_global') == 'true'
         
         try:
-            company = CompanyData.objects.get(id=company_id)
-            notification = Notification.objects.create(
-                company=company,
-                message=message,
-                type=notification_type,
-                created_by=request.user
-            )
-            return JsonResponse({
-                'status': 'success',
-                'message': 'Уведомление создано'
-            })
-        except CompanyData.DoesNotExist:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Компания не найдена'
-            }, status=404)
-    return JsonResponse({
-        'status': 'error',
-        'message': 'Метод не поддерживается'
-    }, status=405)
+            if is_global:
+                notification = Notification.objects.create(
+                    message=message,
+                    type=notification_type,
+                    created_by=request.user,
+                    is_global=True
+                )
+            else:
+                company_id = request.POST.get('company')
+                company = CompanyData.objects.get(id=company_id)
+                notification = Notification.objects.create(
+                    company=company,
+                    message=message,
+                    type=notification_type,
+                    created_by=request.user
+                )
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    
+    return JsonResponse({'status': 'error', 'message': 'Метод не поддерживается'})
 
 def logout_view(request):
     logout(request)
@@ -533,36 +534,6 @@ def notifications_management(request):
         }
     }
     return render(request, 'notifications_management.html', context)
-
-@user_passes_test(lambda u: u.is_staff)
-def create_notification(request):
-    if request.method == 'POST':
-        message = request.POST.get('message')
-        notification_type = request.POST.get('type', 'info')
-        is_global = request.POST.get('is_global') == 'true'
-        
-        try:
-            if is_global:
-                notification = Notification.objects.create(
-                    message=message,
-                    type=notification_type,
-                    created_by=request.user,
-                    is_global=True
-                )
-            else:
-                company_id = request.POST.get('company')
-                company = CompanyData.objects.get(id=company_id)
-                notification = Notification.objects.create(
-                    company=company,
-                    message=message,
-                    type=notification_type,
-                    created_by=request.user
-                )
-            return JsonResponse({'status': 'success'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
-    
-    return JsonResponse({'status': 'error', 'message': 'Метод не поддерживается'})
 
 @login_required
 def create_notification_reply(request):
@@ -694,13 +665,16 @@ def create_announcement(request):
         title = request.POST.get('title')
         description = request.POST.get('description')
         image = request.FILES.get('image')
+        tags = request.POST.get('tags', 'news')  # По умолчанию 'news'
         
         try:
             announcement = Announcement.objects.create(
                 title=title,
                 description=description,
                 image=image,
-                created_by=request.user
+                tags=tags,
+                created_by=request.user,
+                is_active=True
             )
             return JsonResponse({'status': 'success'})
         except Exception as e:
