@@ -964,50 +964,91 @@
                 height: 200px;
             }
         }
+
+        .submenu {
+            display: none;
+            margin-left: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .submenu.active {
+            display: block;
+        }
+
+        .submenu-item {
+            padding: 12px 20px;
+            color: #6B7280;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .submenu-item:hover {
+            background: #f1f5f9;
+            color: #3B82F6;
+        }
+
+        .submenu-item.active {
+            background: #e0e7ff;
+            color: #3B82F6;
+        }
+
+        .submenu-arrow {
+            margin-left: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-item.active .submenu-arrow {
+            transform: rotate(180deg);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Боковая панель -->
         <div class="sidebar">
-            <div class="menu-item active" data-section="main-info">
-                <i class="fas fa-info-circle"></i>
-                Основная информация
+            <!-- Основное меню с подменю -->
+            <div class="menu-item" data-section="main">
+                <i class="fas fa-th-large"></i>
+                Основное
+                <i class="fas fa-chevron-down submenu-arrow"></i>
             </div>
-            <div class="menu-item" data-section="financial">
-                <i class="fas fa-chart-line"></i>
-                Финансы
+            
+            <!-- Подменю ��ля "Основное" -->
+            <div class="submenu" id="main-submenu">
+                <div class="submenu-item" data-section="company">
+                    <i class="fas fa-building"></i>
+                    Информация о компании
+                </div>
+                <div class="submenu-item" data-section="financial">
+                    <i class="fas fa-chart-line"></i>
+                    Финансы
+                </div>
+                <div class="submenu-item" data-section="analytics">
+                    <i class="fas fa-chart-pie"></i>
+                    Аналитика
+                </div>
+                {% if e035.is_in_other_comp and e035.other_comps_ru %}
+                <div class="submenu-item" data-section="related-companies">
+                    <i class="fas fa-sitemap"></i>
+                    Связанные компании
+                </div>
+                {% endif %}
             </div>
-            <div class="menu-item" data-section="documents">
-                <i class="fas fa-file-alt"></i>
-                Документы
-            </div>
-            <div class="menu-item" data-section="licenses">
-                <i class="fas fa-certificate"></i>
-                Лицензии
-            </div>
-            <div class="menu-item" data-section="inspections">
-                <i class="fas fa-clipboard-check"></i>
-                Проверки
-            </div>
-            <div class="menu-item" data-section="goszakup">
-                <i class="fas fa-shopping-cart"></i>
-                Госзакупки
-            </div>
-            <div class="menu-item" data-section="analytics">
-                <i class="fas fa-chart-pie"></i>
-                Аналитика
-            </div>
+
+            <!-- Остальные пункты меню -->
             <div class="menu-item" data-section="notifications">
                 <i class="fas fa-bell"></i>
                 Уведомления
-                {% if analytics.notifications %}
-                <span class="notification-badge">{{ analytics.notifications|length }}</span>
-                {% endif %}
             </div>
             <div class="menu-item" data-section="news">
                 <i class="fas fa-newspaper"></i>
-                Новости финансов
+                Новости
             </div>
             <div class="menu-item" data-section="announcements">
                 <i class="fas fa-bullhorn"></i>
@@ -1441,7 +1482,7 @@
                                         <div><strong>Адрес:</strong> {{ company.location|default:"Не указан" }}</div>
                                         <div><strong>Дата первичной регистрации:</strong> {{ company.first_reg_date|default:"Не указана" }}</div>
                                         <div><strong>Дата последней перерегистрации:</strong> {{ company.last_rereg_date|default:"Не указана" }}</div>
-                                        <div><strong>Регистрирующий оган:</strong> {{ company.reg_organization|default:"Не указан" }}</div>
+                                        <div><strong>Регистр��рующий оган:</strong> {{ company.reg_organization|default:"Не указан" }}</div>
                                     </div>
                                 </div>
                             {% endfor %}
@@ -1591,36 +1632,67 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Находим все пункты меню
+            const mainMenuItem = document.querySelector('.menu-item[data-section="main"]');
+            const submenu = document.getElementById('main-submenu');
             const menuItems = document.querySelectorAll('.menu-item');
+            const submenuItems = document.querySelectorAll('.submenu-item');
             
-            // Добавляем обработчик для каждого пункта
-            menuItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    // Убираем активный класс у всех пунктов меню
+            // Обработчик для главного меню "Основное"
+            mainMenuItem.addEventListener('click', function() {
+                this.classList.toggle('active');
+                submenu.classList.toggle('active');
+            });
+            
+            // Обработчик для пунктов подменю
+            submenuItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Предотвращаем всплытие события
+                    
+                    // Убираем активный класс у всех пунктов меню и подменю
                     menuItems.forEach(i => i.classList.remove('active'));
+                    submenuItems.forEach(i => i.classList.remove('active'));
                     
                     // Добавляем активный класс текущему пункту
                     this.classList.add('active');
+                    mainMenuItem.classList.add('active');
                     
-                    // Получаем id секции для отображения
+                    // Показываем нужную секцию
                     const sectionId = this.getAttribute('data-section') + '-section';
-                    
-                    // Скрываем все секции
                     document.querySelectorAll('.content-section').forEach(section => {
                         section.classList.remove('active');
                     });
                     
-                    // Показываем ужную секцию
                     const targetSection = document.getElementById(sectionId);
                     if (targetSection) {
                         targetSection.classList.add('active');
                     }
-                    
-                    // Добавляем лог для отладки
-                    console.log('Clicked section:', sectionId);
-                    console.log('Target section exists:', !!targetSection);
                 });
+            });
+            
+            // Обработчик для основных пунктов меню
+            menuItems.forEach(item => {
+                if (item !== mainMenuItem) {
+                    item.addEventListener('click', function() {
+                        // Убираем активный класс у всех пунктов
+                        menuItems.forEach(i => i.classList.remove('active'));
+                        submenuItems.forEach(i => i.classList.remove('active'));
+                        submenu.classList.remove('active');
+                        
+                        // Добавляем активный класс текущему пункту
+                        this.classList.add('active');
+                        
+                        // Показываем нужную секцию
+                        const sectionId = this.getAttribute('data-section') + '-section';
+                        document.querySelectorAll('.content-section').forEach(section => {
+                            section.classList.remove('active');
+                        });
+                        
+                        const targetSection = document.getElementById(sectionId);
+                        if (targetSection) {
+                            targetSection.classList.add('active');
+                        }
+                    });
+                }
             });
         });
     </script>
