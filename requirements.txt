@@ -2,3 +2,4 @@ django
 djangorestframework
 beautifulsoup4
 requests
+Pillow
