@@ -32,13 +32,14 @@ def get_data_from_api(number):
     """
     Функция для получения данных из API, пробует оба эндпоинта
     """
-    token = 'ac9cdef70fdb4c75b09d4ed83db6eae2'
+    token = 'd064d4b425404dff992cfe70cb1e9eac'
     base_url = 'https://pk.uchet.kz/api/v2'
     headers = {'accept': 'application/json'}
 
     # Сначала пробуем как ИИН
     iin_url = f'{base_url}/get_iin_info/?token={token}&iin={number}'
     response = requests.get(iin_url, headers=headers)
+    print(response)
     
     if response.status_code == 200 and not response.json().get('error'):
         return response.json()
@@ -54,9 +55,11 @@ def get_data_from_api(number):
 
 def register(request):
     if request.method == 'POST':
+        print("register post")
         number = request.POST.get('iin_bin')
         if number and number.isdigit() and len(number) == 12:
             try:
+                print("register try")
                 api_data = get_data_from_api(number)
                 
                 if api_data:
